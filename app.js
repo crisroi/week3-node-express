@@ -7,14 +7,40 @@ let todos = [
   { id: 2, task: 'Build CRUD API', completed: false },
 ];
 
+const validateTodo = (todo) => {
+  // if (!todo.task) {
+  //   error.push("task field is required");
+  // }
+  // if (!todo.completed) {
+  //   error.push("completed field is required");
+  // }
+
+  return !todo.task ? null : todo;
+}
+
 // GET All – Read
 app.get('/todos', (req, res) => {
   res.status(200).json(todos); // Send array as JSON
 });
 
+// GET Single read
+app.get('/todos/:id', (req, res) => {
+  const todo = todos.find((t) => t.id === parseInt(req.params.id));
+  if (!todo) return res.status(404).json({ message: 'Todo not found' });
+  res.status(200).json(todo);
+});
+
+// GET completed todos
+app.get('/todos/active', (req, res) => {
+  const activeTodos = todos.filter((t) => t.completed === false);
+  res.status(200).json(activeTodos);
+})
+
 // POST New – Create
 app.post('/todos', (req, res) => {
-  const newTodo = { id: todos.length + 1, ...req.body }; // Auto-ID
+  const validate = validateTodo(req.body);
+  if (validate === null) return res.status(400).json({ error: "task field is required" });
+  const newTodo = { id: todos.length + 1, ...validate }; // Auto-ID
   todos.push(newTodo);
   res.status(201).json(newTodo); // Echo back
 });
